@@ -11,11 +11,10 @@ public class Main {
     private static final ClientLogger logger = new ClientLogger(Main.class);
 
     public static void main(String args[]) {
-        String rgName = "rg-weidxu";
-        String vaultName = "kvweidxu";
 
         AzureResourceManager azure = AzureResourceManager.authenticate(new ManagedIdentityCredentialBuilder().build(), new AzureProfile(AzureEnvironment.AZURE)).withDefaultSubscription();
 
-        azure.accessManagement().servicePrincipals().list().stream().count();
+        long count = azure.accessManagement().servicePrincipals().list().stream().count();
+        logger.info("Number of service principals: {}", count);
     }
 }
