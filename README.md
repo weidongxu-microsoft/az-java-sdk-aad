@@ -1,1 +1,1 @@
-# az-java-sdk-aad
+# Sample project for Azure Active Directory via Azure Java Management SDK
