@@ -1,11 +1,12 @@
 package com.microsoft.azure.aad;
 
+import com.azure.core.http.policy.HttpLogDetailLevel;
+import com.azure.core.http.policy.HttpLogOptions;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.core.util.logging.ClientLogger;
-import com.azure.identity.ManagedIdentityCredentialBuilder;
+import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
-import com.azure.resourcemanager.avs.AvsManager;
 
 public class Main {
 
@@ -13,19 +14,22 @@ public class Main {
 
     public static void main(String args[]) {
 
-        AzureProfile profile = new AzureProfile(null, "ec0aa5f7-9e78-40c9-85cd-535c6305b380", AzureEnvironment.AZURE);
+        AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
 
-//        AzureResourceManager azure = AzureResourceManager
-//                .authenticate(new ManagedIdentityCredentialBuilder().build(), profile)
-//                .withDefaultSubscription();
+        AzureResourceManager azure = AzureResourceManager
+                .configure().withLogOptions(new HttpLogOptions().setLogLevel(HttpLogDetailLevel.BODY_AND_HEADERS))
+                .authenticate(new DefaultAzureCredentialBuilder().build(), profile)
+                .withDefaultSubscription();
+
+        azure.resourceGroups().list().stream().count();
 
 //        long count = azure.accessManagement().servicePrincipals().list().stream().count();
 //        logger.info("Number of service principals: {}", count);
-
-        AvsManager manager = AvsManager
-                .authenticate(new ManagedIdentityCredentialBuilder().build(), profile);
-
-        long count = manager.privateClouds().list().stream().count();
-        logger.info("Number of privateClouds: {}", count);
+//
+//        AvsManager manager = AvsManager
+//                .authenticate(new ManagedIdentityCredentialBuilder().build(), profile);
+//
+//        long count = manager.privateClouds().list().stream().count();
+//        logger.info("Number of privateClouds: {}", count);
     }
 }
