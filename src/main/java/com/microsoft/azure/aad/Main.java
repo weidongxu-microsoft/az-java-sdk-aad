@@ -8,6 +8,8 @@ import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Arrays;
 import java.util.List;
@@ -70,8 +72,8 @@ public class Main {
             Mono<List<Object>> asyncList = retrieve.collectList();
             return asyncList
                     .doOnNext(it -> System.out.println("size " + it.size()))
-                    .doOnSubscribe(it -> System.out.println("start " + n));
-//                    .subscribeOn(workScheduler)
+                    .doOnSubscribe(it -> System.out.println("start " + n))
+                    .subscribeOn(Schedulers.newParallel("AzureWork", 10));
         }).repeat(100).blockLast();
     }
 }
