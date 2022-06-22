@@ -8,9 +8,10 @@ import com.azure.identity.ManagedIdentityCredentialBuilder;
 import com.azure.resourcemanager.AzureResourceManager;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -59,17 +60,26 @@ public class Main {
                 azureResourceManager.cosmosDBAccounts().listAsync()
         );
 
-        var publisherList = fluxList.stream()
+        List<Flux<?>> publisherList = fluxList.stream()
                 // I don't see why collectList which partly defeats the purpose of Flux, but use it anyway
                 .map(it -> it.collectList().flatMapIterable(it1 -> it1))
                 .collect(Collectors.toList());
 
         var retrieve = Flux.merge(publisherList.toArray(new Flux[0]));
 
-//        retrieve.blockLast();
+        // follow code does not call SDK at all, but it hangs
+        fluxList = new ArrayList<>();
+        for (int i = 0; i < 18; ++i) {
+            fluxList.add(Flux.defer(() -> Flux.just(1, 2, 3).delayElements(Duration.ofMillis(1))));
+        }
+        publisherList = fluxList.stream()
+                // I don't see why collectList which partly defeats the purpose of Flux, but use it anyway
+                .map(it -> it.collectList().flatMapIterable(it1 -> it1))
+                .collect(Collectors.toList());
+        var retrieve2 = Flux.merge(publisherList.toArray(new Flux[0]));
 
         Flux.just(1, 2, 3, 4, 5, 6).flatMap(n -> {
-            Mono<List<Object>> asyncList = retrieve.collectList();
+            Mono<List<Object>> asyncList = retrieve2.collectList();
             return asyncList
                     .doOnNext(it -> System.out.println("size " + it.size()))
                     .doOnSubscribe(it -> System.out.println("start " + n))
