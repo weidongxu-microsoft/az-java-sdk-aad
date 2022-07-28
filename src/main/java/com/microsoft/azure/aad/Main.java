@@ -1,5 +1,6 @@
 package com.microsoft.azure.aad;
 
+import com.azure.core.credential.TokenCredential;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.core.util.logging.ClientLogger;
@@ -22,17 +23,14 @@ public class Main {
 
         // see https://github.com/Azure/azure-sdk-for-java/tree/main/sdk/resourcemanager#authentication for environment variables
 
-//        AzureProfile profile = new AzureProfile(null, "ec0aa5f7-9e78-40c9-85cd-535c6305b380", AzureEnvironment.AZURE);
-//
-//        AzureResourceManager azure = AzureResourceManager
-//                .authenticate(new ManagedIdentityCredentialBuilder().build(), profile)
-//                .withDefaultSubscription();
-
+        TokenCredential credential = new DefaultAzureCredentialBuilder().build();
         AzureProfile profile = new AzureProfile(AzureEnvironment.AZURE);
 
         AzureResourceManager azureResourceManager = AzureResourceManager
-                .authenticate(new DefaultAzureCredentialBuilder().build(), profile)
+                .authenticate(credential, profile)
                 .withDefaultSubscription();
+
+        var vnets = azureResourceManager.networks().list().stream().collect(Collectors.toList());
 
         List<Flux<?>> fluxList = Arrays.asList(
                 azureResourceManager.storageAccounts().listAsync(),
