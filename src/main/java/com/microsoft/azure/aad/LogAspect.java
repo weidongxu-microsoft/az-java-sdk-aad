@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.Aspect;
 @Aspect
 public class LogAspect {
 
-    @Around("@annotation(com.microsoft.azure.aad.Log)")
+    @Around("@annotation(com.microsoft.azure.aad.Log) && execution(* *(..))")
     public Object doIdempotentOperation(ProceedingJoinPoint joinPoint) throws Throwable {
         System.out.println("before");
         Object obj = joinPoint.proceed();

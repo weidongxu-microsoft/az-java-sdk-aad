@@ -51,6 +51,15 @@
                     <target>${maven.compiler.target}</target>
                     <complianceLevel>${maven.compiler.target}</complianceLevel>
                     <encoding>${project.build.sourceEncoding}</encoding>
+
+                    <sources>
+                        <source>
+                            <basedir>src/main/java</basedir>
+                            <includes>
+                                <include>**/LogAspect.java</include>
+                            </includes>
+                        </source>
+                    </sources>
                 </configuration>
                 <executions>
                     <execution>
