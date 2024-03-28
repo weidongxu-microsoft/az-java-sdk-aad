@@ -1,7 +1,11 @@
 package com.microsoft.azure.aad;
 
 import com.azure.core.credential.TokenCredential;
+import com.azure.core.http.HttpPipelineCallContext;
+import com.azure.core.http.HttpPipelineNextPolicy;
+import com.azure.core.http.HttpResponse;
 import com.azure.core.http.policy.HttpLogDetailLevel;
+import com.azure.core.http.policy.HttpPipelinePolicy;
 import com.azure.core.management.AzureEnvironment;
 import com.azure.core.management.profile.AzureProfile;
 import com.azure.core.util.logging.ClientLogger;
@@ -10,6 +14,7 @@ import com.azure.resourcemanager.AzureResourceManager;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.logging.LoggingMeterRegistry;
 import reactor.core.observability.micrometer.Micrometer;
+import reactor.core.publisher.Mono;
 
 public class Main {
 
@@ -26,6 +31,13 @@ public class Main {
 
         AzureResourceManager azureResourceManager = AzureResourceManager
                 .configure()
+                .withPolicy(new HttpPipelinePolicy() {
+                    @Log
+                    @Override
+                    public Mono<HttpResponse> process(HttpPipelineCallContext context, HttpPipelineNextPolicy next) {
+                        return next.process();
+                    }
+                })
                 .withLogLevel(HttpLogDetailLevel.BASIC)
                 .authenticate(credential, profile)
                 .withDefaultSubscription();
